@@ -1,6 +1,6 @@
 //! The cover inside the file: the first picture of a list that loads, as a
-//! square of at most 1200×1200 (the owner's choice, 23 November 2026: the
-//! originals reach 3543×3543 and 5 MB, a copy in every track).
+//! square of at most 1200×1200: the originals reach 3543×3543 and 5 MB, a
+//! copy in every track.
 
 use std::io::Cursor;
 

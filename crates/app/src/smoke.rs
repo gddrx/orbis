@@ -7,19 +7,19 @@
 //! With `ORBIS_SMOKE_WRITE=1` it instead checks the track menu's items that
 //! write to the account — like, dislike, a new private playlist, adding to
 //! it — on a real track, undoes each, and checks every step through the API.
-//! Only with the account owner's leave.
+//! Only with the leave of whoever owns the account.
 //!
 //! `ORBIS_SMOKE_SIGN_IN=1` checks the sign-in dialog's actions without
 //! signing in, for a start without a session (see [`run_sign_in`]).
 //!
 //! `ORBIS_SMOKE_SETTINGS=write`, then `=read` in a second run, checks that
 //! every setting changes, applies and survives the restart (see
-//! [`run_settings`]); only with `ORBIS_CONFIG_DIR`, so that the owner's
+//! [`run_settings`]); only with `ORBIS_CONFIG_DIR`, so that the real
 //! settings are never touched.
 //!
 //! With `ORBIS_MUSIC_DIR` set the session also downloads (see
 //! `smoke_downloads`); without it nothing is downloaded, so a smoke test
-//! never writes into the owner's music folder. `ORBIS_SMOKE_DOWNLOADS=1`
+//! never writes into the real music folder. `ORBIS_SMOKE_DOWNLOADS=1`
 //! runs only the downloads, on the first track of Discover Mix; with
 //! `ORBIS_SMOKE_KEEP_DOWNLOADS=1` it leaves an album's downloads running
 //! and says how many, and a second run over the same data folder with
@@ -905,7 +905,7 @@ fn music_files(dir: &std::path::Path) -> (usize, usize) {
     (audio, hidden)
 }
 
-/// Downloads, only into `ORBIS_MUSIC_DIR` and never into the owner's music
+/// Downloads, only into `ORBIS_MUSIC_DIR` and never into the real music
 /// folder: the menu's «Download» on the playing track, the list for the
 /// bench's pictures, then «Download all» on its album (or another track's)
 /// and «Cancel all», and «Download all» on Liked Music, which asks first.
@@ -1151,7 +1151,7 @@ async fn smoke_tab_frames(
 /// Signing out with «Close the tabs and queues too»: with a mix playing and
 /// a search open, the account's tabs close, Home and Library stay, nothing
 /// plays. The check runs `close_account_tabs`, the part of signing out the
-/// switch adds: a real sign-out would remove the owner's saved sign-in.
+/// switch adds: a real sign-out would remove the saved sign-in.
 async fn smoke_close_tabs(backend: &Window, mix: u64) {
     backend.invoke_mut(move |b| b.show_tab(mix as i64));
     sleep(6).await;

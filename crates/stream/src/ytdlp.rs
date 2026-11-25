@@ -45,9 +45,9 @@ const VERSION_TIMEOUT: Duration = Duration::from_secs(10);
 
 /// The quick way to a signed-in link: only the `web_music` client, which
 /// gives a Premium account Opus 774 without a PO token, and none of the
-/// other clients' config pages. Measured on the owner's Premium account
-/// (23 November 2026, yt-dlp 2026.10.26): 3.1 s a link against 4.5 s with
-/// yt-dlp's defaults, the same format.
+/// other clients' config pages. Measured on a Premium account (23 November
+/// 2026, yt-dlp 2026.10.26): 3.1 s a link against 4.5 s with yt-dlp's
+/// defaults, the same format.
 pub const QUICK_ARGS: [&str; 2] = [
     "--extractor-args",
     "youtube:player_client=web_music;player_skip=configs",

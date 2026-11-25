@@ -179,28 +179,27 @@ fn main() {
     }
     STARTED.get_or_init(std::time::Instant::now);
     // The software renderer keeps only decoded pictures, without textures and
-    // the GPU driver's copies of them: measured on step 13, PSS 126–135 MB
-    // against 178–179 MB with OpenGL after scrolling the whole home page, for
-    // three times the CPU while scrolling. The owner chose it as the default
-    // (22 November 2026).
+    // the GPU driver's copies of them: measured, PSS 126–135 MB against
+    // 178–179 MB with OpenGL after scrolling the whole home page, for three
+    // times the CPU while scrolling. Less memory won: it is the default.
     if std::env::var_os("QT_QUICK_BACKEND").is_none() {
         // SAFETY: the first thing main does, before any other thread exists.
         unsafe { std::env::set_var("QT_QUICK_BACKEND", "software") };
     }
     // Qt Quick packs every picture up to half the window's size into shared
     // atlas textures that never give space back, and covers fill one atlas
-    // after another (measured on step 13 with OpenGL: 12 MB more PSS after
-    // scrolling the home page). The window shows no other pictures, so it
+    // after another (measured with OpenGL: 12 MB more PSS after scrolling
+    // the home page). The window shows no other pictures, so it
     // goes without an atlas unless told otherwise.
     if std::env::var_os("QSG_ATLAS_SIZE_LIMIT").is_none() {
         // SAFETY: the first thing main does, before any other thread exists.
         unsafe { std::env::set_var("QSG_ATLAS_SIZE_LIMIT", "1") };
     }
-    // At a fractional scale (1.5 on the owner's screen) the software renderer
+    // At a fractional scale (such as 1.5) the software renderer
     // repaints the whole window on every frame, so the progress, once a
     // second, cost 3–5 ms over the glass backdrop instead of next to nothing.
     // Forced partial updates repaint only what changed; on a probe at 1.5
-    // the picture came out identical to a full repaint (step 15).
+    // the picture came out identical to a full repaint.
     if std::env::var_os("QSG_SOFTWARE_RENDERER_FORCE_PARTIAL_UPDATES").is_none() {
         // SAFETY: the first thing main does, before any other thread exists.
         unsafe { std::env::set_var("QSG_SOFTWARE_RENDERER_FORCE_PARTIAL_UPDATES", "1") };

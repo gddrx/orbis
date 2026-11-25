@@ -70,8 +70,7 @@ impl Bitrates {
 }
 
 impl Default for Bitrates {
-    /// MP3 at 320 and AAC at 256 kbit/s (the owner's choice, 22 November
-    /// 2026).
+    /// MP3 at 320 and AAC at 256 kbit/s.
     fn default() -> Self {
         Self { mp3: 320, m4a: 256 }
     }
