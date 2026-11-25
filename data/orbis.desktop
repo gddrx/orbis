@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=orbis
+GenericName=Music Player
+GenericName[uk]=Музичний програвач
+Comment=A light YouTube Music player
+Comment[uk]=Легкий програвач YouTube Music
+Exec=orbis
+Icon=orbis
+Terminal=false
+StartupNotify=true
+SingleMainWindow=true
+Categories=AudioVideo;Audio;Player;
+Keywords=youtube;music;player;

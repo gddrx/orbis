@@ -1,0 +1,6 @@
+#!/bin/sh
+# orbis in its AppImage: the yt-dlp, Node.js and ffmpeg it brings come
+# before the system's.
+HERE="$(dirname "$(readlink -f "$0")")"
+export PATH="$HERE/usr/bin:$HERE/opt/yt-dlp:$PATH"
+exec "$HERE/usr/bin/orbis" "$@"

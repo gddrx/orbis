@@ -1,0 +1,19 @@
+# The graphify graph: generated, rebuilt locally by the post-commit hook.
+/graphify-out/
+
+# The tasks' workspace: files needed for longer than one session, but not by the
+# repository.
+/workspace/
+
+# Rust build output.
+/target/
+
+# Claude Code's own settings: local to this machine, they hold absolute paths
+# of the owner's home directory.
+/.claude/
+/CLAUDE.local.md
+
+# The agent's project rules and the work plans with their measurements: kept
+# on the owner's machine only, out of the public repository.
+/CLAUDE.md
+/plans/

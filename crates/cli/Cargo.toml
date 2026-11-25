@@ -1,0 +1,23 @@
+[package]
+name = "orbis-cli"
+description = "Command-line access to the orbis core, for checks without the UI"
+version.workspace = true
+license.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+desktop = { version = "0.1.0", path = "../desktop" }
+orbis-core = { version = "0.1.0", path = "../core" }
+player = { version = "0.1.0", path = "../player" }
+serde_json = "1"
+stream = { version = "0.1.0", path = "../stream" }
+tempfile = "3"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+ytm = { version = "0.1.0", path = "../ytm" }
