@@ -5,6 +5,8 @@ Qt Quick over a core in Rust: no web engine runs while you listen, so the
 player does not slow down, grow in memory or drop frames over a long
 session the way a browser tab does.
 
+![The orbis window playing an album](docs/screenshot.png)
+
 orbis is made for KDE Plasma on Wayland first; other desktops get the
 player without the blur and with whatever tray they have.
 
