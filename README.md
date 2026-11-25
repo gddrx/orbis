@@ -122,11 +122,19 @@ scripts/install.sh
 and the menu entry and icon into `~/.local/share`. `scripts/install.sh
 --uninstall` removes them.
 
-`scripts/appimage.sh` builds an AppImage from the libraries of the system
-it runs on. The result is named `orbis-<version>-local-x86_64.AppImage`: it
-is meant for that machine and is not for passing on, as it takes whatever
-FFmpeg the system has — some distributions ship one that may not be
-redistributed.
+`scripts/appimage-release.sh` builds the AppImage of a release,
+`orbis-<version>-x86_64.AppImage`, in a podman container on AlmaLinux 9:
+Qt from qt.io, and FFmpeg, libmpv, libplacebo and KWindowSystem built from
+source — FFmpeg and libmpv under the LGPL, audio only. It runs where glibc
+is 2.34 or newer, and `orbis-<version>-THIRD-PARTY.md` beside it lists all
+it carries. The versions and checksums of the sources are in
+`scripts/release/versions.sh`.
+
+`scripts/appimage.sh` is quicker: it builds an AppImage from the libraries
+of the system it runs on. The result is named
+`orbis-<version>-local-x86_64.AppImage`: it is meant for that machine and is
+not for passing on, as it takes whatever FFmpeg the system has — some
+distributions ship one that may not be redistributed.
 
 ## Where orbis keeps things
 

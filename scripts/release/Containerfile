@@ -1,0 +1,62 @@
+# The system the release AppImage is built on (see appimage-release.sh).
+# AlmaLinux 9 has glibc 2.34, as old as the RHEL 9 that Qt's own Linux
+# binaries are built on: the AppImage runs where glibc is 2.34 or newer.
+FROM docker.io/library/almalinux:9
+
+# Compilers and build tools; the development files of what the AppImage
+# takes from this system (graphics, Wayland, fonts, sound, D-Bus, the
+# libraries Qt WebEngine loads); and the codecs FFmpeg is built with.
+RUN dnf -y install epel-release dnf-plugins-core \
+    && dnf config-manager --set-enabled crb \
+    && dnf -y install \
+        gcc gcc-c++ make cmake ninja-build pkgconf-pkg-config nasm \
+        git xz bzip2 tar patch which file findutils diffutils \
+        python3 python3-pip \
+        perl perl-IPC-Cmd \
+        mesa-libGL-devel mesa-libEGL-devel mesa-libgbm-devel libdrm-devel \
+        libxkbcommon-devel libxkbcommon-x11-devel libX11-devel libxcb-devel \
+        xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-cursor \
+        wayland-devel wayland-protocols-devel \
+        fontconfig-devel freetype-devel harfbuzz-devel fribidi-devel \
+        libass-devel \
+        alsa-lib-devel pipewire-devel pulseaudio-libs-devel \
+        dbus-devel glib2-devel \
+        nss nspr libXcomposite libXdamage libXrandr libXtst libxshmfence cups-libs \
+        openssl-devel zlib-devel \
+        opus-devel lame-devel \
+        desktop-file-utils \
+    && dnf clean all
+
+# Meson newer than the system's (mpv and libplacebo need >= 1.3), Jinja for
+# libplacebo, aqtinstall for Qt.
+RUN python3 -m pip install --no-cache-dir "meson>=1.3,<2" "jinja2>=3,<4" "aqtinstall>=3.2,<4" \
+    && python3 -m pip freeze > /opt/pip-versions.txt
+
+# Qt 6.12.0 from qt.io: the modules orbis and orbis-login use (6.12.0: its
+# Qt WebEngine is the newest on qt.io for 6.12).
+RUN python3 -m aqt install-qt linux desktop 6.12.0 linux_gcc_64 \
+        --outputdir /opt/qt \
+        --modules qtwebengine qtwebchannel qtpositioning qtimageformats \
+    && rm -rf /opt/qt/Docs /opt/qt/Examples
+ENV QTDIR=/opt/qt/6.12.0/gcc_64
+ENV PKG_CONFIG_PATH=/opt/qt/6.12.0/gcc_64/lib/pkgconfig:/opt/deps/lib64/pkgconfig:/opt/deps/lib/pkgconfig:/opt/deps/share/pkgconfig \
+    CMAKE_PREFIX_PATH=/opt/qt/6.12.0/gcc_64:/opt/deps \
+    LD_LIBRARY_PATH=/opt/qt/6.12.0/gcc_64/lib:/opt/deps/lib64:/opt/deps/lib
+
+# Rust, the same release as on the machine orbis is written on.
+ENV RUSTUP_HOME=/opt/rustup CARGO_HOME=/opt/cargo PATH=/opt/cargo/bin:/opt/qt/6.12.0/gcc_64/bin:/usr/local/bin:/usr/bin:/bin
+RUN curl -fsSL --proto '=https' --tlsv1.2 https://sh.rustup.rs -o /tmp/rustup-init.sh \
+    && sh /tmp/rustup-init.sh -y --no-modify-path --profile minimal --default-toolchain 1.100.0 \
+    && rm /tmp/rustup-init.sh
+
+# KWindowSystem's X11 part (build-deps.sh) and libxkbfile, which Qt
+# WebEngine loads. A layer of its own, so that the
+# layers above, Qt among them, stay cached.
+RUN dnf -y install xcb-util-wm-devel xcb-util-keysyms-devel libXfixes-devel libXext-devel libXrender-devel libxkbfile && dnf clean all
+
+# Qt SerialPort: the NMEA plugin of Qt Positioning, which Qt WebEngine brings
+# along, links it. Added on its own, without the base packages again.
+RUN python3 -m aqt install-qt linux desktop 6.12.0 linux_gcc_64 \
+        --outputdir /opt/qt --noarchives --modules qtserialport
+
+WORKDIR /src
