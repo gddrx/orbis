@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="468" viewBox="0 0 820 468" role="img" aria-labelledby="t d">
+<title id="t">orbis and YouTube Music in Chrome: memory and CPU while playing</title>
+<desc id="d">Memory (PSS): orbis with the window open uses 165 MB with 5 tabs and 204 MB with 11; a YouTube Music tab in Chrome uses 317 MB at the start and 472 MB an hour later. CPU with the window visible: orbis 0.65 to 0.9 percent of one core, the YouTube Music tab 16.2 percent.</desc>
+<style>
+  .bg { fill: #fcfcfb; }
+  .h1 { font: 600 17px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #0b0b0b; }
+  .h2 { font: 600 14px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #0b0b0b; }
+  .sub, .legend, .label { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #52514e; }
+  .legend { fill: #0b0b0b; }
+  .value { font: 600 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #0b0b0b; font-variant-numeric: tabular-nums; }
+  .tick { font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #898781; font-variant-numeric: tabular-nums; }
+  .grid { stroke: #e1e0d9; stroke-width: 1; }
+  .axis { stroke: #c3c2b7; stroke-width: 1; }
+  .s1 { fill: #2a78d6; }
+  .s2 { fill: #eb6834; }
+  @media (prefers-color-scheme: dark) {
+    .bg { fill: #1a1a19; }
+    .h1, .h2, .legend, .value { fill: #f0efec; }
+    .sub, .label { fill: #c3c2b7; }
+    .grid { stroke: #2c2c2a; }
+    .axis { stroke: #383835; }
+    .s1 { fill: #3987e5; }
+    .s2 { fill: #d95926; }
+  }
+</style>
+<rect class="bg" x="0.5" y="0.5" width="819" height="467" rx="12"/>
+<text class="h1" x="24" y="34">orbis and YouTube Music in Chrome, while playing</text>
+<text class="sub" x="24" y="56">One machine, 22–23 November 2026. Shorter is better.</text>
+<rect class="s1" x="24" y="72" width="12" height="12" rx="3"/>
+<text class="legend" x="42" y="82.5">orbis</text>
+<rect class="s2" x="104" y="72" width="12" height="12" rx="3"/>
+<text class="legend" x="122" y="82.5">YouTube Music tab in Chrome</text>
+<text class="h2" x="24" y="122">Memory (PSS), MB</text>
+<line class="grid" x1="300.0" y1="140" x2="300.0" y2="288"/>
+<text class="tick" x="300.0" y="304" text-anchor="middle">0</text>
+<line class="grid" x1="388.8" y1="140" x2="388.8" y2="288"/>
+<text class="tick" x="388.8" y="304" text-anchor="middle">100</text>
+<line class="grid" x1="477.6" y1="140" x2="477.6" y2="288"/>
+<text class="tick" x="477.6" y="304" text-anchor="middle">200</text>
+<line class="grid" x1="566.4" y1="140" x2="566.4" y2="288"/>
+<text class="tick" x="566.4" y="304" text-anchor="middle">300</text>
+<line class="grid" x1="655.2" y1="140" x2="655.2" y2="288"/>
+<text class="tick" x="655.2" y="304" text-anchor="middle">400</text>
+<line class="grid" x1="744.0" y1="140" x2="744.0" y2="288"/>
+<text class="tick" x="744.0" y="304" text-anchor="middle">500</text>
+<line class="axis" x1="300" y1="140" x2="300" y2="288"/>
+<text class="label" x="288" y="162.5" text-anchor="end">orbis, window open, 5 tabs</text>
+<path class="s1" d="M300.0 148.0 h142.5 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-142.5 z"/>
+<text class="value" x="454.5" y="162.5">165</text>
+<text class="label" x="288" y="198.5" text-anchor="end">orbis, window open, 11 tabs</text>
+<path class="s1" d="M300.0 184.0 h177.2 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-177.2 z"/>
+<text class="value" x="489.2" y="198.5">204</text>
+<text class="label" x="288" y="234.5" text-anchor="end">YouTube Music tab, at the start</text>
+<path class="s2" d="M300.0 220.0 h277.5 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-277.5 z"/>
+<text class="value" x="589.5" y="234.5">317</text>
+<text class="label" x="288" y="270.5" text-anchor="end">YouTube Music tab, an hour later</text>
+<path class="s2" d="M300.0 256.0 h415.1 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-415.1 z"/>
+<text class="value" x="727.1" y="270.5">472</text>
+<text class="h2" x="24" y="338">CPU, % of one core, window visible</text>
+<line class="grid" x1="300.0" y1="356" x2="300.0" y2="432"/>
+<text class="tick" x="300.0" y="448" text-anchor="middle">0</text>
+<line class="grid" x1="411.0" y1="356" x2="411.0" y2="432"/>
+<text class="tick" x="411.0" y="448" text-anchor="middle">5</text>
+<line class="grid" x1="522.0" y1="356" x2="522.0" y2="432"/>
+<text class="tick" x="522.0" y="448" text-anchor="middle">10</text>
+<line class="grid" x1="633.0" y1="356" x2="633.0" y2="432"/>
+<text class="tick" x="633.0" y="448" text-anchor="middle">15</text>
+<line class="grid" x1="744.0" y1="356" x2="744.0" y2="432"/>
+<text class="tick" x="744.0" y="448" text-anchor="middle">20</text>
+<line class="axis" x1="300" y1="356" x2="300" y2="432"/>
+<text class="label" x="288" y="378.5" text-anchor="end">orbis</text>
+<path class="s1" d="M300.0 364.0 h16.0 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-16.0 z"/>
+<text class="value" x="328.0" y="378.5">0.65–0.9</text>
+<text class="label" x="288" y="414.5" text-anchor="end">YouTube Music tab</text>
+<path class="s2" d="M300.0 400.0 h355.6 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-355.6 z"/>
+<text class="value" x="667.6" y="414.5">16.2</text>
+</svg>

@@ -67,6 +67,24 @@ player without the blur and with whatever tray they have.
 playlists, albums, artists, search, radio, lyrics, ratings, playlist edits,
 playback and downloads. `orbis-cli --help` lists them.
 
+## How light it is
+
+![Memory and CPU of orbis and of a YouTube Music tab in Chrome while playing](docs/orbis-vs-browser.svg)
+
+| While playing | Memory (PSS) | CPU |
+|---|---|---|
+| orbis, window open, 5 tabs | 165 MB | 0.65–0.9 % of one core |
+| orbis, window open, 11 tabs | 204 MB | — |
+| orbis, window hidden in the tray | 148–173 MB | 0.55 % |
+| YouTube Music tab in Chrome, visible | 317 MB, 472 MB an hour later | 16.2 % |
+
+Measured on one machine on 22–23 November 2026. Chrome played on the
+desktop; orbis ran in a nested KWin with software rendering and its sound
+sent nowhere (decoded in real time, not played). Memory is PSS, which does
+not count shared pages twice. With the window open and paused, orbis draws
+no frames at all. A track whose stream link is already known starts within
+37–260 ms after "Next".
+
 ## Install
 
 ### AppImage
