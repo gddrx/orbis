@@ -8,6 +8,9 @@ pub struct MpvHandle {
     _private: [u8; 0],
 }
 
+/// `MPV_ERROR_OPTION_NOT_FOUND`.
+pub const ERROR_OPTION_NOT_FOUND: c_int = -5;
+
 pub const FORMAT_NONE: c_int = 0;
 pub const FORMAT_STRING: c_int = 1;
 pub const FORMAT_FLAG: c_int = 3;

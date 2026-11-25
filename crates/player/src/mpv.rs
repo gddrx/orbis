@@ -21,6 +21,11 @@ fn check(code: c_int) -> Result<(), MpvError> {
     Err(MpvError(text.to_string_lossy().into_owned()))
 }
 
+/// Options of mpv's Lua scripts (the on-screen controller, the youtube-dl
+/// hook): a libmpv built without Lua, as in the release AppImage, has no
+/// scripts and so no such options — there is nothing to turn off then.
+const SCRIPT_OPTIONS: [&str; 2] = ["osc", "ytdl"];
+
 fn c(text: &str) -> Result<CString, MpvError> {
     CString::new(text).map_err(|_| MpvError(format!("NUL byte in {text:?}")))
 }
@@ -78,12 +83,16 @@ impl Mpv {
             return Err(MpvError("mpv_create failed".into()));
         }
         let mpv = Self { handle };
-        for (name, value) in options {
-            let (name, value) = (c(name)?, c(value)?);
+        for &(name, value) in options {
+            let (c_name, c_value) = (c(name)?, c(value)?);
             // SAFETY: valid handle and NUL-terminated strings.
-            check(unsafe {
-                ffi::mpv_set_option_string(mpv.handle, name.as_ptr(), value.as_ptr())
-            })?;
+            let code = unsafe {
+                ffi::mpv_set_option_string(mpv.handle, c_name.as_ptr(), c_value.as_ptr())
+            };
+            if code == ffi::ERROR_OPTION_NOT_FOUND && SCRIPT_OPTIONS.contains(&name) {
+                continue;
+            }
+            check(code)?;
         }
         // SAFETY: valid, not yet initialized handle.
         check(unsafe { ffi::mpv_initialize(mpv.handle) })?;
@@ -322,5 +331,13 @@ mod tests {
         assert_eq!(mpv.get_flag("idle-active"), Some(true));
         assert!(mpv.get_string("mpv-version").unwrap().starts_with("mpv "));
         assert!(mpv.command(&["no-such-command"]).is_err());
+    }
+
+    #[test]
+    fn only_script_options_may_be_missing() {
+        // Present or not in this libmpv, the scripts' options never fail.
+        assert!(Mpv::new(&[("ao", "null"), ("osc", "no"), ("ytdl", "no")]).is_ok());
+        let unknown = Mpv::new(&[("ao", "null"), ("no-such-option", "no")]).unwrap_err();
+        assert_eq!(unknown, MpvError("option not found".into()));
     }
 }
