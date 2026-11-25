@@ -7,9 +7,12 @@ release container, from build-appimage.sh):
 
 Where a library came from is found by its file name: Qt's own folder, the
 libraries build-deps.sh made in /opt/deps, else the AlmaLinux package that
-owns it (rpm -qf), whose license files are copied. The Rust crates are
-listed from cargo metadata, with the license files of their vendored
-sources.
+owns it (rpm -qf), whose license files are copied — from the package, its
+documentation, the packages built from the same source, or
+scripts/release/licenses/. The Rust crates are listed from cargo metadata,
+with the license files of their vendored sources; a crate that ships none
+gets the text its license names. Anything left without a license text
+stops the build.
 
 Usage: python3 -I licenses.py <AppDir> <unpacked Node.js> <orbis version>
 """
@@ -96,10 +99,106 @@ def rpm_owner(name):
 
 
 rows = []  # (component, version, license, source)
+missing = []  # what no license text was found for
+EXTRA = '/scripts/licenses'
+
+
+def rpm_query(*args):
+    return subprocess.run(['rpm', *args], capture_output=True, text=True,
+                          check=False).stdout.split()
+
+
+def alma_texts(package, srpm):
+    """License files of an AlmaLinux package: its own, its documentation's
+    COPYING or LICENSE, those of the packages built from the same source,
+    or what scripts/release/licenses/ keeps for it."""
+    siblings = [package] + [line.split()[0] for line in subprocess.run(
+        ['rpm', '-qa', '--qf', '%{NAME} %{SOURCERPM}\n'], capture_output=True, text=True,
+        check=False).stdout.splitlines() if line.endswith(' ' + srpm) and not line.startswith(package + ' ')]
+    for name in siblings:
+        found = [path for path in rpm_query('-qL', name) if os.path.isfile(path)]
+        found += [path for path in rpm_query('-qd', name)
+                  if os.path.isfile(path) and os.path.basename(path).upper().startswith(LICENSE_NAMES)]
+        if found:
+            return found
+    extra = os.path.join(EXTRA, package)
+    return [extra] if os.path.isdir(extra) else []
+
+
+def crate_texts(package, target):
+    """The text a crate without license files is under: Apache-2.0 when its
+    license offers it, else MIT or BSD-3-Clause with its authors' notice."""
+    spdx = package.get('license') or ''
+    authors = ', '.join(package.get('authors') or []) or f"the {package['name']} authors"
+    os.makedirs(target, exist_ok=True)
+    if 'Apache-2.0' in spdx:
+        shutil.copy(os.path.join(EXTRA, 'Apache-2.0.txt'), os.path.join(target, 'LICENSE-Apache-2.0'))
+        if spdx != 'Apache-2.0':
+            with open(os.path.join(target, 'CHOICE'), 'w', encoding='utf-8') as file:
+                file.write(f'{spdx}: taken under Apache-2.0.\n')
+        return True
+    if spdx == 'MIT':
+        text = MIT
+    elif spdx == 'BSD-3-Clause':
+        text = BSD3
+    else:
+        return False
+    with open(os.path.join(target, f'LICENSE-{spdx}'), 'w', encoding='utf-8') as file:
+        file.write(f'Copyright (c) {authors}\n\n{text}')
+    return True
+
+
+MIT = """Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+BSD3 = """Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
 
 # orbis itself.
 copy_licenses('orbis', ['/src/LICENSE'])
 rows.append(('orbis', VERSION, 'GPL-3.0-or-later', 'https://github.com/gddrx/orbis'))
+copy_licenses('material-icons', ['/src/crates/app/src/qml/icons/LICENSE-Apache-2.0.txt'])
+rows.append(('Material Icons by Google (most icons of the window)', '-', 'Apache-2.0',
+             'https://github.com/google/material-design-icons'))
 
 # Qt: its license texts, wherever aqt put them.
 qt_texts = [os.path.join(root, name)
@@ -148,9 +247,12 @@ rows.append(('Node.js', VERSIONS['NODE_VERSION'], 'MIT (bundled parts: see its L
              VERSIONS['NODE_URL'].replace('-linux-x64.tar.xz', '.tar.xz')))
 yt_dlp = subprocess.run([os.path.join(APPDIR, 'opt/yt-dlp/yt-dlp'), '--version'],
                         capture_output=True, text=True, check=False).stdout.strip()
+if not os.path.isfile('/tools/yt-dlp-THIRD_PARTY_LICENSES.txt'):
+    missing.append('yt-dlp: /tools/yt-dlp-THIRD_PARTY_LICENSES.txt (appimage-tools.sh fetches it)')
+copy_licenses('yt-dlp', ['/tools/yt-dlp-THIRD_PARTY_LICENSES.txt'])
 rows.append(('yt-dlp (standalone build, with Python and its modules)', yt_dlp,
-             'Unlicense; the Python inside: PSF-2.0; its modules: see '
-             'https://github.com/yt-dlp/yt-dlp/blob/master/THIRD_PARTY_LICENSES.txt',
+             'Unlicense; the Python inside: PSF-2.0; its modules: their own '
+             '(usr/share/licenses/yt-dlp/)',
              f'https://github.com/yt-dlp/yt-dlp/releases/tag/{yt_dlp}'))
 
 # The libraries linuxdeploy took from AlmaLinux.
@@ -167,7 +269,10 @@ for path in elf_files():
     if owner:
         packages.setdefault(owner, []).append(name)
 for (package, version, spdx, srpm), names in sorted(packages.items()):
-    copy_licenses(f'almalinux/{package}', [f'/usr/share/licenses/{package}'])
+    texts = alma_texts(package, srpm)
+    if not texts:
+        missing.append(f'AlmaLinux package {package}')
+    copy_licenses(f'almalinux/{package}', texts)
     rows.append((f"{package} ({', '.join(sorted(names))})", version, spdx,
                  f'AlmaLinux 9 source package {srpm} (https://vault.almalinux.org/)'))
 
@@ -182,10 +287,21 @@ for package in metadata['packages']:
     if package['source'] is None:
         continue
     folder = os.path.dirname(package['manifest_path'])
-    copy_licenses(f"rust/{package['name']}-{package['version']}", license_files(folder))
+    component = f"rust/{package['name']}-{package['version']}"
+    files = license_files(folder)
+    if files:
+        copy_licenses(component, files)
+    elif not crate_texts(package, os.path.join(LICENSES, component)):
+        missing.append(f"crate {package['name']} {package['version']} ({package.get('license')})")
     crates.append((package['name'], package['version'], package.get('license') or '(see its files)',
                    package.get('repository') or f"https://crates.io/crates/{package['name']}"))
 
+if missing:
+    sys.exit('no license text for:\n  ' + '\n  '.join(missing))
+empty = [os.path.relpath(root, LICENSES) for root, dirs, files in os.walk(LICENSES)
+         if not dirs and not files]
+if empty:
+    sys.exit('empty license folders:\n  ' + '\n  '.join(empty))
 os.makedirs(DOC, exist_ok=True)
 # Readable by everyone, whatever the originals had.
 for root, dirs, files in os.walk(LICENSES):

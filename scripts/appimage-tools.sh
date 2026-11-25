@@ -1,8 +1,9 @@
 # Fetches into $TOOLS, once, what both AppImage builds need: linuxdeploy
 # and its Qt plugin (the "continuous" builds), the AppImage runtime
 # (checked against the SHA-256 GitHub gives for it) and the latest yt-dlp
-# (checked against its release's SHA2-256SUMS). Sourced by appimage.sh and
-# appimage-release.sh; delete $TOOLS to take newer ones.
+# (checked against its release's SHA2-256SUMS) with the licenses of what it
+# carries. Sourced by appimage.sh and appimage-release.sh; delete $TOOLS
+# to take newer ones.
 mkdir -p "$TOOLS"
 
 # A dropped connection fails the build instead of hanging it.
@@ -44,4 +45,19 @@ if [ ! -s "$TOOLS/yt-dlp_linux" ]; then
     echo "$sum  $TOOLS/yt-dlp_linux.part" | sha256sum -c --quiet -
     mv "$TOOLS/yt-dlp_linux.part" "$TOOLS/yt-dlp_linux"
     chmod +x "$TOOLS/yt-dlp_linux"
+fi
+# The licenses of what yt-dlp's standalone build carries (its Python and
+# modules), from its sources at the same version, checked against the git
+# hash GitHub gives for the file. The release AppImage carries it.
+if [ ! -s "$TOOLS/yt-dlp-THIRD_PARTY_LICENSES.txt" ]; then
+    tag=$("$TOOLS/yt-dlp_linux" --version)
+    meta=$("${CURL[@]}" -sS "https://api.github.com/repos/yt-dlp/yt-dlp/contents/THIRD_PARTY_LICENSES.txt?ref=$tag")
+    url=$(python3 -I -c 'import json, sys; print(json.load(sys.stdin)["download_url"])' <<< "$meta")
+    sha=$(python3 -I -c 'import json, sys; print(json.load(sys.stdin)["sha"])' <<< "$meta")
+    "${CURL[@]}" -sS -o "$TOOLS/yt-dlp-THIRD_PARTY_LICENSES.txt.part" "$url"
+    if [ "$(git hash-object "$TOOLS/yt-dlp-THIRD_PARTY_LICENSES.txt.part")" != "$sha" ]; then
+        echo "yt-dlp's THIRD_PARTY_LICENSES.txt does not match its git hash" >&2
+        exit 1
+    fi
+    mv "$TOOLS/yt-dlp-THIRD_PARTY_LICENSES.txt.part" "$TOOLS/yt-dlp-THIRD_PARTY_LICENSES.txt"
 fi
