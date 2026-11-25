@@ -91,10 +91,23 @@ no frames at all. A track whose stream link is already known starts within
 
 ### AppImage
 
-Release AppImages will appear on the
-[Releases](https://github.com/gddrx/orbis/releases) page. They carry
-everything orbis needs; the host gives only glibc, the graphics drivers and
-the fonts.
+Download `orbis-<version>-x86_64.AppImage` from the
+[Releases](https://github.com/gddrx/orbis/releases) page, make it executable
+and start it:
+
+```bash
+chmod +x orbis-*-x86_64.AppImage
+```
+
+```bash
+./orbis-*-x86_64.AppImage
+```
+
+It runs on x86_64 Linux with glibc 2.34 or newer (Ubuntu 22.04, Debian 12,
+Fedora, RHEL 9 and later). It carries Qt, libmpv, FFmpeg, yt-dlp and
+Node.js; the system gives the rest a desktop always has — glibc, the
+graphics drivers, fonts, sound and D-Bus. Each release also lists what is
+inside with its license (`orbis-<version>-THIRD-PARTY.md`).
 
 ### From source
 

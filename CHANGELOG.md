@@ -7,7 +7,7 @@ minor version may change anything.
 
 ## [Unreleased]
 
-## [0.1.0] - not released yet
+## [0.1.0] - 2026-11-25
 
 The first version: a YouTube Music player for the Linux desktop without a
 web engine in its window.
@@ -33,3 +33,6 @@ web engine in its window.
 - An English and a Ukrainian interface.
 - `orbis-cli`, the same core from the command line.
 - `orbis --version` and the version in the settings window.
+
+[Unreleased]: https://github.com/gddrx/orbis/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/gddrx/orbis/releases/tag/v0.1.0
